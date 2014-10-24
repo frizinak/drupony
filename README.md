@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/frizinak/drupony.svg)](https://travis-ci.org/frizinak/drupony)
+
+
 # Installation:
 
 Add this to your projects composer.json:
