@@ -1,0 +1,3 @@
+parameters:
+  test: set
+  symfony.component.filesystem.class: Symfony\Component\Filesystem\Filesystem

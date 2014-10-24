@@ -1,0 +1,65 @@
+<?php
+
+use Drupony\Drupony;
+use Symfony\Component\Filesystem\Filesystem;
+
+/**
+ * Includes the composer autoloader if composer was installed in this dir.
+ * No-op if it was already included or our main class exists (external autoloader)
+ *
+ * @throws RuntimeException If our main class and autoloader don't exist.
+ */
+function drupony_autload() {
+  static $loaded;
+  if ($loaded) return;
+  $loaded = TRUE;
+
+  $autoloaderFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
+  $alreadyLoaded = class_exists('Drupony\\Drupony');
+
+  if ($alreadyLoaded || !file_exists($autoloaderFile)) {
+    if (!$alreadyLoaded) {
+      throw new RuntimeException(sprintf('Drupony was\'t autoloaded and failed to include %s', $autoloaderFile));
+    }
+    return;
+  }
+
+  require_once $autoloaderFile;
+}
+
+function drupony_get_cache_dir($type = 'container') {
+  return rtrim(trim(variable_get('drupony:cachedir', __DIR__ . DIRECTORY_SEPARATOR . 'cache')), "\\/") .
+         DIRECTORY_SEPARATOR . $type;
+}
+
+function drupony_clear_cache($type) {
+  $drupony = drupony_get_wrapper();
+  /** @var Filesystem $filesystem */
+  $filesystem = $drupony->getContainer()->get('symfony.component.filesystem');
+  $filesystem->remove(drupony_get_cache_dir($type));
+}
+
+/**
+ * Returns the default Drupony instance.
+ *
+ * @param bool $dev TRUE:  the container-cache monitors file changes.
+ *                  FALSE: the container is cached once and requires a delete before it is refreshed.
+ *                  - @see Symfony\Component\Config\ConfigCache
+ * @return Drupony
+ */
+function drupony_get_wrapper($dev = FALSE) {
+  static $drupony;
+  if (isset($drupony)) {
+    return $drupony;
+  }
+  drupony_autload();
+
+  $cacheDir = drupony_get_cache_dir('container') . DIRECTORY_SEPARATOR . sha1(conf_path(FALSE));
+  $cacheMethod = $dev ? Drupony::CACHE_CHANGE : Drupony::CACHE_FULL;
+
+  $drupony = new Drupony($cacheDir, $cacheMethod, 'Main');
+
+  $drupony->getContainer();
+  return $drupony;
+}
+
