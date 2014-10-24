@@ -1,5 +1,3 @@
-TODO: write this ;)
-
 # Installation:
 
 Add this to your projects composer.json:
@@ -7,7 +5,7 @@ Add this to your projects composer.json:
 ```json
 "extra": {
   "installer-paths": {
-    "<path to your modules dir>/drupony": ["klipkens/drupony"]
+    "<path to your modules dir>/drupony": ["frizinak/drupony"]
   }
 }
 ```
