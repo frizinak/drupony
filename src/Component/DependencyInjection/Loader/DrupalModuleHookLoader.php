@@ -19,26 +19,20 @@ class DrupalModuleHookLoader extends FileLoader {
     $path = $this->locator->locate($file);
     $this->container->addResource(new FileResource($path));
     $content = $this->validate($content, $file);
-    // empty file
     if (empty($content)) {
       return;
     }
 
-    // parameters
     if (isset($content['parameters'])) {
       if (!is_array($content['parameters'])) {
         throw new InvalidArgumentException(sprintf('The "parameters" key should contain an array in %s.', $file));
       }
-
       foreach ($content['parameters'] as $key => $value) {
         $this->container->setParameter($key, $this->resolveServices($value));
       }
     }
 
-    // extensions
     $this->loadFromExtensions($content);
-
-    // services
     $this->parseDefinitions($content, $file);
   }
 

@@ -8,6 +8,7 @@ use Drupony\Drupony;
 class DruponyTest extends \PHPUnit_Framework_TestCase {
 
   protected $cacheDir;
+
   protected $sourceFiles = array();
 
   public function setUp() {
@@ -17,7 +18,6 @@ class DruponyTest extends \PHPUnit_Framework_TestCase {
       $path = DRUPAL_ROOT . DIRECTORY_SEPARATOR . drupal_get_path('module', 'drupony') . DIRECTORY_SEPARATOR . $fn;
       file_exists($path) && $this->sourceFiles[$k] = $path;
     }
-
   }
 
   public function testDruponyContainerParameter() {
@@ -28,7 +28,6 @@ class DruponyTest extends \PHPUnit_Framework_TestCase {
 
     $this->assertEquals($container->getParameter('test'), 'set');
     $this->assertEquals($container->getParameter('install_profile'), 'wicked-profile');
-    $container->get('test.service');
   }
 
   public function testDruponyContainerService() {
@@ -43,6 +42,9 @@ class DruponyTest extends \PHPUnit_Framework_TestCase {
     $testService = $container->get('test.service');
 
     $this->assertEquals($testService->getProperty(), $container->getParameter('install_profile'));
+    $this->assertEquals($testService->getAVariable(), $container->getVariable('a_variable'));
+    $this->assertNotNull($testService->getAVariable());
+
     $this->assertInstanceOf($class, $filesystem);
   }
 
@@ -57,21 +59,18 @@ class DruponyTest extends \PHPUnit_Framework_TestCase {
   }
 
   public function testDruponyContainerDebugFileCache() {
-    $now = $this->setupMTimes();
-
     /** -- Built container for first time. -- */
     $drupony = new Drupony($this->cacheDir, Drupony::CACHE_CHANGE, 'file-monitor-cache-test');
     $this->assertFileNotExists($drupony->getCacheFilePath());
     $drupony->getContainer();
     $this->assertFileExists($drupony->getCacheFilePath());
+    $now = $this->setupMTimes($drupony);
 
     /** -- Get container from cache. -- */
     $this->setMTime($drupony->getCacheFilePath(), $now - 3600);
     $this->assertEquals($now - 3600, filemtime($drupony->getCacheFilePath()));
     $drupony = new Drupony($this->cacheDir, Drupony::CACHE_CHANGE, 'file-monitor-cache-test');
-    $GLOBALS['wop'] = 1;
     $drupony->getContainer();
-    unset($GLOBALS['wop']);
     $this->assertEquals($now - 3600, filemtime($drupony->getCacheFilePath()));
 
     /** -- Rebuilt container as a yaml-file has been altered. -- */
@@ -83,7 +82,7 @@ class DruponyTest extends \PHPUnit_Framework_TestCase {
     $this->assertGreaterThan($now - 3600, filemtime($drupony->getCacheFilePath()));
 
     /** -- Rebuilt container as a module-hook-file has been altered. -- */
-    $now = $this->setupMTimes();
+    $now = $this->setupMTimes($drupony);
     $this->setMTime($drupony->getCacheFilePath(), $now - 3600);
     $this->setMTime($this->sourceFiles['hook'], $now);
     $this->assertEquals($now - 3600, filemtime($drupony->getCacheFilePath()));
@@ -94,7 +93,10 @@ class DruponyTest extends \PHPUnit_Framework_TestCase {
   }
 
   public function testDruponyContainerFileCache() {
-    $now = $this->setupMTimes();
+    $now = time();
+    foreach ($this->sourceFiles as $file) {
+      touch($file, $now - 7200);
+    }
 
     /** -- Built container for first time. -- */
     $drupony = new Drupony($this->cacheDir, Drupony::CACHE_FULL, 'full-cache-test');
@@ -118,7 +120,6 @@ class DruponyTest extends \PHPUnit_Framework_TestCase {
     $this->assertEquals($mtime, filemtime($drupony->getCacheFilePath()));
 
     /** -- Get container from cache even though a module-hook-file has been altered. -- */
-    $this->setupMTimes();
     $this->setMTime($drupony->getCacheFilePath(), $mtime);
     $this->setMTime($this->sourceFiles['hook'], $now);
     $this->assertEquals($now - 3600, filemtime($drupony->getCacheFilePath()));
@@ -173,9 +174,14 @@ class DruponyTest extends \PHPUnit_Framework_TestCase {
     }
   }
 
-  protected function setupMTimes() {
+  protected function getAllSourceFiles(Drupony $drupony) {
+    $files = unserialize(file_get_contents($drupony->getCacheFilePath() . '.meta'));
+    return $files;
+  }
+
+  protected function setupMTimes(Drupony $drupony) {
     $now = time();
-    foreach ($this->sourceFiles as $path) {
+    foreach ($this->getAllSourceFiles($drupony) as $path) {
       $this->setMTime($path, $now - 7200);
     }
     return $now;

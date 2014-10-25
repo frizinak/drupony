@@ -3,7 +3,6 @@ clearstatcache();
 define('DRUPAL_ROOT', __DIR__);
 define('DRUPONY_TEST_DIR', sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'drupony_tests');
 
-
 // Spoof some drupal methods.
 function module_list() {
   return array('drupony');
@@ -13,7 +12,7 @@ function drupal_get_path($type, $module) {
   return $module;
 }
 
-$conf = array();
+$conf = array('a_variable' => 'a_value');
 function variable_get($name, $default = NULL) {
   global $conf;
   if (isset($conf[$name])) {

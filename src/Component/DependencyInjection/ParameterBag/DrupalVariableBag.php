@@ -3,6 +3,7 @@
 
 namespace Drupony\Component\DependencyInjection\ParameterBag;
 
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 
 class DrupalVariableBag extends ParameterBag {
@@ -58,19 +59,18 @@ class DrupalVariableBag extends ParameterBag {
   public function resolve() {
   }
 
-  /**
-   * no-op
-   */
-  public function resolveValue($value, array $resolving = array()) {
-  }
-
-  /**
-   * no-op
-   */
-  public function resolveString($value, array $resolving = array()) {
-  }
-
   public function isResolved() {
     return TRUE;
+  }
+
+  public function resolveString($value, array $resolved = array()) {
+    if (preg_match('/\&([^\&\s]+)\&$/', $value, $match)) {
+      $definition = new Definition();
+      $definition->setFactoryService('service_container');
+      $definition->setFactoryMethod('getVariable');
+      $definition->setArguments(array($match[1]));
+      return $definition;
+    }
+    return $value;
   }
 }

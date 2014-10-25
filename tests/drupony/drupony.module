@@ -3,6 +3,14 @@
 class someRandomService {
 
   protected $property;
+  protected $aVariable;
+
+  /**
+   * @return mixed
+   */
+  public function getAVariable() {
+    return $this->aVariable;
+  }
 
   public function getProperty() {
     return $this->property;
@@ -12,8 +20,8 @@ class someRandomService {
     $this->property = $property;
   }
 
-  public function __construct(\Symfony\Component\Filesystem\Filesystem $filesystem) {
-
+  public function __construct(\Symfony\Component\Filesystem\Filesystem $filesystem, $aVariable) {
+    $this->aVariable = $aVariable;
   }
 
 }
@@ -36,9 +44,9 @@ function drupony_drupony_services() {
   return array(
     'test.service' => array(
       'class' => '%test.class%',
-      'arguments' => array('@symfony.component.filesystem'),
+      'arguments' => array('@symfony.component.filesystem','&a_variable&'),
       'calls' => array(
-         array('setProperty' ,array('%install_profile%')),
+        array('setProperty', array('%install_profile%')),
       ),
     ),
   );

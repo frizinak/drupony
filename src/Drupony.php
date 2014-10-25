@@ -3,10 +3,12 @@
 
 namespace Drupony;
 
+use Drupony\Component\DependencyInjection\Compiler\ResolveVariablePlaceHolderPass;
 use Drupony\Component\DependencyInjection\DruponyContainerBuilder;
 use Drupony\Component\DependencyInjection\Loader\DrupalModuleHookLoader;
 use Symfony\Component\Config\ConfigCache;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
@@ -104,6 +106,7 @@ class Drupony {
     }
 
     $container->has('drupony') || $this->prepareContainer($container);
+    $container->addCompilerPass(new ResolveVariablePlaceHolderPass(), PassConfig::TYPE_OPTIMIZE);
     $container->compile();
     return $container;
   }
