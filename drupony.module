@@ -14,7 +14,7 @@ function drupony_autload() {
   if ($loaded) return;
   $loaded = TRUE;
 
-  $autoloaderFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
+  $autoloaderFile = __DIR__ . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
   $alreadyLoaded = class_exists('Drupony\\Drupony');
 
   if ($alreadyLoaded || !file_exists($autoloaderFile)) {

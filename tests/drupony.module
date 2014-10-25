@@ -1,0 +1,45 @@
+<?php
+
+class someRandomService {
+
+  protected $property;
+
+  public function getProperty() {
+    return $this->property;
+  }
+
+  public function setProperty($property) {
+    $this->property = $property;
+  }
+
+  public function __construct(\Symfony\Component\Filesystem\Filesystem $filesystem) {
+
+  }
+
+}
+
+/**
+ * Implements hook_drupony_parameters
+ */
+function drupony_drupony_parameters() {
+  return array(
+    'install_profile' => 'wicked-profile',
+    'test.class' => 'someRandomService',
+  );
+
+}
+
+/**
+ * Implements hook_drupony_services
+ */
+function drupony_drupony_services() {
+  return array(
+    'test.service' => array(
+      'class' => '%test.class%',
+      'arguments' => array('@symfony.component.filesystem'),
+      'calls' => array(
+         array('setProperty' ,array('%install_profile%')),
+      ),
+    ),
+  );
+}
