@@ -1,13 +1,8 @@
 <?php
-
+clearstatcache();
+define('DRUPAL_ROOT', __DIR__);
 define('DRUPONY_TEST_DIR', sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'drupony_tests');
-define('DRUPONY_TEST_PARAM_FILE', __DIR__ . DIRECTORY_SEPARATOR . 'parameters.yml');
-define('DRUPONY_TEST_HOOK_FILE', __DIR__ . DIRECTORY_SEPARATOR . 'drupony.module');
 
-define('DRUPONY_TEST_PARAM_FILE_MTIME', filemtime(DRUPONY_TEST_PARAM_FILE));
-define('DRUPONY_TEST_HOOK_FILE_MTIME', filemtime(DRUPONY_TEST_HOOK_FILE));
-
-define('DRUPAL_ROOT', __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..');
 
 // Spoof some drupal methods.
 function module_list() {
@@ -15,7 +10,7 @@ function module_list() {
 }
 
 function drupal_get_path($type, $module) {
-  return $module . DIRECTORY_SEPARATOR . 'tests';
+  return $module;
 }
 
 $conf = array();
@@ -41,7 +36,7 @@ function module_hook($module, $hook) {
     return TRUE;
   }
   else {
-    require_once __DIR__ . DIRECTORY_SEPARATOR . $module . '.module';
+    require_once __DIR__ . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . $module . '.module';
   }
 
   return function_exists($function);
@@ -59,7 +54,5 @@ $loader = require __DIR__ . '/../vendor/autoload.php';
 register_shutdown_function(function () {
   $fs = new \Symfony\Component\Filesystem\Filesystem();
   $fs->remove(DRUPONY_TEST_DIR);
-  touch(DRUPONY_TEST_HOOK_FILE, DRUPONY_TEST_HOOK_FILE_MTIME);
-  touch(DRUPONY_TEST_PARAM_FILE, DRUPONY_TEST_PARAM_FILE_MTIME);
 });
 

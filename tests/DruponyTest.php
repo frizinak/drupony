@@ -8,9 +8,16 @@ use Drupony\Drupony;
 class DruponyTest extends \PHPUnit_Framework_TestCase {
 
   protected $cacheDir;
+  protected $sourceFiles = array();
 
   public function setUp() {
     $this->cacheDir = DRUPONY_TEST_DIR . DIRECTORY_SEPARATOR . 'cacheDir';
+    $candidates = array('params' => 'parameters.yml', 'services' => 'services.yml', 'hook' => 'drupony.module');
+    foreach ($candidates as $k => $fn) {
+      $path = DRUPAL_ROOT . DIRECTORY_SEPARATOR . drupal_get_path('module', 'drupony') . DIRECTORY_SEPARATOR . $fn;
+      file_exists($path) && $this->sourceFiles[$k] = $path;
+    }
+
   }
 
   public function testDruponyContainerParameter() {
@@ -59,33 +66,30 @@ class DruponyTest extends \PHPUnit_Framework_TestCase {
     $this->assertFileExists($drupony->getCacheFilePath());
 
     /** -- Get container from cache. -- */
-    touch($drupony->getCacheFilePath(), $now - 3600);
-    clearstatcache();
+    $this->setMTime($drupony->getCacheFilePath(), $now - 3600);
     $this->assertEquals($now - 3600, filemtime($drupony->getCacheFilePath()));
     $drupony = new Drupony($this->cacheDir, Drupony::CACHE_CHANGE, 'file-monitor-cache-test');
+    $GLOBALS['wop'] = 1;
     $drupony->getContainer();
-    clearstatcache();
+    unset($GLOBALS['wop']);
     $this->assertEquals($now - 3600, filemtime($drupony->getCacheFilePath()));
 
     /** -- Rebuilt container as a yaml-file has been altered. -- */
-    touch(DRUPONY_TEST_PARAM_FILE, $now);
-    clearstatcache();
-    $this->assertEquals($now, filemtime(DRUPONY_TEST_PARAM_FILE));
+    $this->setMTime($this->sourceFiles['params'], $now);
+    $this->assertGreaterThan(filemtime($drupony->getCacheFilePath()), filemtime($this->sourceFiles['params']));
+    $this->assertEquals($now, filemtime($this->sourceFiles['params']));
     $drupony = new Drupony($this->cacheDir, Drupony::CACHE_CHANGE, 'file-monitor-cache-test');
     $drupony->getContainer();
-    clearstatcache();
-    $this->assertGreaterThan($now - 3600, $current = filemtime($drupony->getCacheFilePath()));
+    $this->assertGreaterThan($now - 3600, filemtime($drupony->getCacheFilePath()));
 
     /** -- Rebuilt container as a module-hook-file has been altered. -- */
     $now = $this->setupMTimes();
-    touch($drupony->getCacheFilePath(), $now - 3600);
-    touch(DRUPONY_TEST_HOOK_FILE, $now);
-    clearstatcache();
+    $this->setMTime($drupony->getCacheFilePath(), $now - 3600);
+    $this->setMTime($this->sourceFiles['hook'], $now);
     $this->assertEquals($now - 3600, filemtime($drupony->getCacheFilePath()));
-    $this->assertEquals($now, filemtime(DRUPONY_TEST_HOOK_FILE));
+    $this->assertEquals($now, filemtime($this->sourceFiles['hook']));
     $drupony = new Drupony($this->cacheDir, Drupony::CACHE_CHANGE, 'file-monitor-cache-test');
     $drupony->getContainer();
-    clearstatcache();
     $this->assertGreaterThan($now - 3600, filemtime($drupony->getCacheFilePath()));
   }
 
@@ -100,33 +104,27 @@ class DruponyTest extends \PHPUnit_Framework_TestCase {
 
     /** -- Get container from cache. -- */
     $mtime = $now - 3600;
-    touch($drupony->getCacheFilePath(), $mtime);
-    clearstatcache();
+    $this->setMTime($drupony->getCacheFilePath(), $mtime);
     $this->assertEquals($mtime, filemtime($drupony->getCacheFilePath()));
     $drupony = new Drupony($this->cacheDir, Drupony::CACHE_FULL, 'full-cache-test');
     $drupony->getContainer();
-    clearstatcache();
     $this->assertEquals($mtime, filemtime($drupony->getCacheFilePath()));
 
     /** -- Get container from cache even though a yaml-file has been altered. -- */
-    touch(DRUPONY_TEST_PARAM_FILE, $now);
-    clearstatcache();
-    $this->assertEquals($now, filemtime(DRUPONY_TEST_PARAM_FILE));
+    $this->setMTime($this->sourceFiles['params'], $now);
+    $this->assertEquals($now, filemtime($this->sourceFiles['params']));
     $drupony = new Drupony($this->cacheDir, Drupony::CACHE_FULL, 'full-cache-test');
     $drupony->getContainer();
-    clearstatcache();
     $this->assertEquals($mtime, filemtime($drupony->getCacheFilePath()));
 
     /** -- Get container from cache even though a module-hook-file has been altered. -- */
     $this->setupMTimes();
-    touch($drupony->getCacheFilePath(), $mtime);
-    touch(DRUPONY_TEST_HOOK_FILE, $now);
-    clearstatcache();
+    $this->setMTime($drupony->getCacheFilePath(), $mtime);
+    $this->setMTime($this->sourceFiles['hook'], $now);
     $this->assertEquals($now - 3600, filemtime($drupony->getCacheFilePath()));
-    $this->assertEquals($now, filemtime(DRUPONY_TEST_HOOK_FILE));
+    $this->assertEquals($now, filemtime($this->sourceFiles['hook']));
     $drupony = new Drupony($this->cacheDir, Drupony::CACHE_FULL, 'full-cache-test');
     $drupony->getContainer();
-    clearstatcache();
     $this->assertEquals($mtime, filemtime($drupony->getCacheFilePath()));
   }
 
@@ -161,10 +159,25 @@ class DruponyTest extends \PHPUnit_Framework_TestCase {
     $drupony->getContainer()->getVariableBag()->clear();
   }
 
+  protected function setMTime($filePath, $mtime) {
+    if (!touch($filePath, $mtime)) {
+      throw new \RuntimeException(sprintf('File %s\'s filemtime could not be set', $filePath));
+    }
+    if (($real = filemtime($filePath)) !== $mtime) {
+      throw new \RuntimeException(
+        sprintf('File %s\'s filemtime (%s) should\'ve been set but doesn\'t match requested mtime (%s)',
+                $filePath,
+                $real,
+                $mtime)
+      );
+    }
+  }
+
   protected function setupMTimes() {
     $now = time();
-    touch(DRUPONY_TEST_PARAM_FILE, $now - 7200);
-    touch(DRUPONY_TEST_HOOK_FILE, $now - 7200);
+    foreach ($this->sourceFiles as $path) {
+      $this->setMTime($path, $now - 7200);
+    }
     return $now;
   }
 }
