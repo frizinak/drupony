@@ -4,9 +4,11 @@
 namespace Drupony;
 
 use Drupony\Component\DependencyInjection\DruponyContainerBuilder;
+use Drupony\Component\DependencyInjection\Loader\DrupalModuleHookLoader;
 use Symfony\Component\Config\ConfigCache;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\Filesystem\Filesystem;
@@ -65,19 +67,35 @@ class Drupony {
   }
 
   /**
-   * Creates the container from services.yml and parameters.yml inside enabled module dirs.
+   * Creates the container from services.yml, parameters.yml (inside enabled module dirs),
+   * hook_drupony_parameters and hook_drupony_services.
    *
    * @return DruponyContainerBuilder
    */
   protected function createContainer() {
     $container = new DruponyContainerBuilder();
-    $yamlLoader = new YamlFileLoader($container, new FileLocator(DRUPAL_ROOT));
+    $locator = new FileLocator(DRUPAL_ROOT);
+    $yamlLoader = new YamlFileLoader($container, $locator);
+    $moduleLoader = new DrupalModuleHookLoader($container, $locator);
+
     foreach (module_list() as $module) {
       if (!($path = drupal_get_path('module', $module))) continue;
-      foreach (array('services.yml', 'parameters.yml') as $filename) {
-        try {
-          $yamlLoader->load($path . DIRECTORY_SEPARATOR . $filename);
-        } catch (\InvalidArgumentException $e) {
+
+      foreach (array('parameters', 'services') as $type) {
+        $yml = $path . DIRECTORY_SEPARATOR . $type . '.yml';
+        $hook = 'drupony_' . $type;
+
+        if (file_exists(DRUPAL_ROOT . DIRECTORY_SEPARATOR . $yml)) {
+          $yamlLoader->load($yml);
+        }
+
+        if (module_hook($module, 'drupony_' . $type)) {
+          // File should now be included.
+          // Drupal hook implementation will probably never change in 7
+          // but still worth noting that this is dirty.
+          $functionReflector = new \ReflectionFunction($module . '_' . $hook);
+          $definition = module_invoke($module, $hook);
+          $moduleLoader->load($functionReflector->getFileName(), NULL, array($type => $definition));
         }
       }
     }
