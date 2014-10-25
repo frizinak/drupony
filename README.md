@@ -1,11 +1,21 @@
 [![Build Status](https://travis-ci.org/frizinak/drupony.svg)](https://travis-ci.org/frizinak/drupony)
 
+Currently: a tiny drupal - symfony-dependency-injection wrapper.
+Aspired:
+ - hook_menu > symfony routes and controllers
+ - node / taxonomy_terms / user > entities
+ - ...
+ - always remain a module that provides an sdk.
 
 # Installation:
 
 Add this to your projects composer.json:
 
 ```json
+"require":{
+  ...
+  "frizinak/drupony": "?.?.?"
+}
 "extra": {
   "installer-paths": {
     "<path to your modules dir>/drupony": ["frizinak/drupony"]
@@ -34,3 +44,21 @@ $drupony->getContainer()  // Any service declared in enabledModule/service.yml
                         ->get('symfony.component.filesystem')
                         ->mkdir('woop');
 ```
+
+defining a service:
+yourModule/parameters.yml (or hook_drupony_parameters)
+```
+parameters:
+ yourModule.yourService.class: YourModule\YourServiceClass
+```
+
+yourModule/services.yml (or hook_drupony_services)
+```
+services:
+ yourModule.yourService:
+   class: %yourModule.yourService.class%
+```
+
+# Contributing
+
+please do.
