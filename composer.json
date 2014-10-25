@@ -18,5 +18,8 @@
     "psr-4": {
       "Drupony\\": "src"
     }
+  },
+  "extra": {
+    "installer-name": "drupony"
   }
 }
