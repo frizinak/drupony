@@ -3,16 +3,25 @@
   "description": "",
   "license": "MIT License",
   "type": "drupal-module",
+  "authors": [
+    {
+      "name": "Kobe Lipkens",
+      "email": "kobe@wieni.be"
+    }
+  ],
   "require": {
     "php": ">=5.3",
-    "guzzle/guzzle": "3.9.x",
+    "guzzle/guzzle": "3.9.*",
     "symfony/dependency-injection": "2.5.*",
     "symfony/yaml": "2.5.*",
     "symfony/config": "2.5.*",
-    "composer/installers": "1.0.x"
+    "composer/installers": "1.0.*"
   },
   "require-dev": {
     "phpunit/phpunit": "~4.2"
+  },
+  "suggest":{
+    "symfony/expression-language": ""
   },
   "autoload": {
     "psr-4": {
