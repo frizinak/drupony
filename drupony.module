@@ -33,10 +33,7 @@ function drupony_get_cache_dir($type = 'container') {
 }
 
 function drupony_clear_cache($type) {
-  $drupony = drupony_get_wrapper();
-  /** @var Filesystem $filesystem */
-  $filesystem = $drupony->getContainer()->get('symfony.component.filesystem');
-  $filesystem->remove(drupony_get_cache_dir($type));
+  (new Filesystem())->remove(drupony_get_cache_dir($type));
 }
 
 /**
