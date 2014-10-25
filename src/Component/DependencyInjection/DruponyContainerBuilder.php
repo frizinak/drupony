@@ -12,7 +12,7 @@ class DruponyContainerBuilder extends ContainerBuilder {
   /**
    * @var DrupalPersistentVariableBag
    */
-  protected $variablesBag;
+  protected $variableBag;
 
   protected $druponyInitialized = FALSE;
 
@@ -23,7 +23,7 @@ class DruponyContainerBuilder extends ContainerBuilder {
 
   public function druponyInitialize() {
     if (!$this->druponyInitialized) {
-      $this->variablesBag = new DrupalPersistentVariableBag();
+      $this->variableBag = new DrupalPersistentVariableBag();
       $this->druponyInitialized = TRUE;
     }
     return $this;
@@ -32,8 +32,8 @@ class DruponyContainerBuilder extends ContainerBuilder {
   /**
    * @return DrupalPersistentVariableBag
    */
-  public function getVariablesBag() {
-    return $this->variablesBag;
+  public function getVariableBag() {
+    return $this->variableBag;
   }
 
   /**
@@ -45,7 +45,7 @@ class DruponyContainerBuilder extends ContainerBuilder {
    * @return bool
    */
   public function hasVariable($name) {
-    return $this->variablesBag->has($name);
+    return $this->variableBag->has($name);
   }
 
   /**
@@ -56,7 +56,7 @@ class DruponyContainerBuilder extends ContainerBuilder {
    * @return mixed  The variable value
    */
   public function getVariable($name) {
-    return $this->variablesBag->get($name);
+    return $this->variableBag->get($name);
   }
 
   /**
@@ -66,7 +66,11 @@ class DruponyContainerBuilder extends ContainerBuilder {
    * @param mixed  $name The variable value
    */
   public function setVariable($name, $value) {
-    $this->variablesBag->set($name, $value);
+    $this->variableBag->set($name, $value);
+  }
+
+  public function delVariable($name) {
+    $this->variableBag->remove($name);
   }
 
 }
