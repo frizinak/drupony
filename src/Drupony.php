@@ -38,12 +38,12 @@ class Drupony {
    */
   public function getContainer() {
     if (isset($this->container)) {
-      return $this->container->druponyInitialize();
+      return $this->container;
     }
 
     if (!$this->cacheMethod) {
       $this->container = $this->createContainer();
-      return $this->container->druponyInitialize();
+      return $this->container;
     }
 
     $fileSystem = new Filesystem();
@@ -51,18 +51,22 @@ class Drupony {
     $cacheFilepath = $this->getCacheFilePath();
     $cache = new ConfigCache($cacheFilepath, !($this->cacheMethod & self::CACHE_FULL));
     if (!$cache->isFresh()) {
-      $this->container = $this->createContainer();
-      $this->cacheContainer($this->container, $cache, $this->containerClass);
-      return $this->container;
+      $this->cacheContainer($this->createContainer(), $cache, $this->containerClass);
     };
 
     require_once $cache;
-    $this->container = new $this->containerClass();
-    return $this->container->druponyInitialize();
+    $this->container = $this->prepareContainer(new $this->containerClass());
+    return $this->container;
   }
 
   public function getCacheFilePath() {
     return $this->cacheDir . DIRECTORY_SEPARATOR . $this->containerClass . '.php';
+  }
+
+  protected function prepareContainer(DruponyContainerBuilder $container) {
+    $container->druponyInitialize();
+    $container->set('drupony', $this);
+    return $container;
   }
 
   /**
@@ -99,6 +103,7 @@ class Drupony {
       }
     }
 
+    $container->has('drupony') || $this->prepareContainer($container);
     $container->compile();
     return $container;
   }

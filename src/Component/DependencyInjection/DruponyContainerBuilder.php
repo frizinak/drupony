@@ -24,6 +24,7 @@ class DruponyContainerBuilder extends ContainerBuilder {
   public function druponyInitialize() {
     if (!$this->druponyInitialized) {
       $this->variableBag = new DrupalPersistentVariableBag();
+      $this->set('container', $this);
       $this->druponyInitialized = TRUE;
     }
     return $this;
@@ -63,7 +64,7 @@ class DruponyContainerBuilder extends ContainerBuilder {
    * Sets a drupal variable.
    *
    * @param string $name The variable name
-   * @param mixed  $name The variable value
+   * @param mixed $name The variable value
    */
   public function setVariable($name, $value) {
     $this->variableBag->set($name, $value);
