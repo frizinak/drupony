@@ -28,8 +28,8 @@ function drupony_autload() {
 }
 
 function drupony_get_cache_dir($type = 'container') {
-  return rtrim(trim(variable_get('drupony:cachedir', __DIR__ . DIRECTORY_SEPARATOR . 'cache')), "\\/") .
-         DIRECTORY_SEPARATOR . $type;
+  $dir = variable_get('drupony_cachedir', __DIR__ . DIRECTORY_SEPARATOR . 'cache') . '\\' . $type;
+  return preg_replace('/(\\\|\\/)+/', DIRECTORY_SEPARATOR, rtrim(trim($dir), '\\/'));
 }
 
 function drupony_clear_cache($type) {
