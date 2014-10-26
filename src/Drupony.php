@@ -6,6 +6,7 @@ namespace Drupony;
 use Drupony\Component\DependencyInjection\Compiler\ResolveVariablePlaceHolderPass;
 use Drupony\Component\DependencyInjection\DruponyContainerBuilder;
 use Drupony\Component\DependencyInjection\Loader\DrupalModuleHookLoader;
+use Drupony\Component\DependencyInjection\Loader\YamlArrayLoader;
 use Symfony\Component\Config\ConfigCache;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
@@ -81,7 +82,7 @@ class Drupony {
     $container = new DruponyContainerBuilder();
     $locator = new FileLocator(DRUPAL_ROOT);
     $yamlLoader = new YamlFileLoader($container, $locator);
-    $moduleLoader = new DrupalModuleHookLoader($container, $locator);
+    $moduleLoader = new YamlArrayLoader($container, $locator);
 
     foreach (module_list() as $module) {
       if (!($path = drupal_get_path('module', $module))) continue;
