@@ -57,7 +57,8 @@ function drupony_get_cache_dir($type = 'container') {
 
 function drupony_clear_cache($type) {
   drupony_autload();
-  (new Filesystem())->remove(drupony_get_cache_dir($type));
+  $filesystem = new Filesystem();
+  $filesystem->remove(drupony_get_cache_dir($type));
 }
 
 /**
