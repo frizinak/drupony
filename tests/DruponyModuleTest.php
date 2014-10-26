@@ -53,6 +53,22 @@ class DruponyModuleTest extends \PHPUnit_Framework_TestCase {
     $this->assertFileExists(static::$cacheDir);
   }
 
+  public function testAutoloadFinder() {
+    $dir = _drupony_find_composer_autoloader_dir(
+      __DIR__ . DIRECTORY_SEPARATOR . 'drupony',
+      __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR
+    );
+
+    $this->assertEquals(realpath(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'vendor'), $dir);
+  }
+
+  /**
+   * @expectedException \RuntimeException
+   */
+  public function testAutoloadFinderFail() {
+    _drupony_find_composer_autoloader_dir(__DIR__ . DIRECTORY_SEPARATOR . 'drupony', __DIR__);
+  }
+
   public function testDruponyMainContainer() {
     $drupony = drupony_get_wrapper(true);
     $this->assertFileNotExists($drupony->getCacheFilePath());

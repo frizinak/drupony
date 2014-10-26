@@ -4,7 +4,8 @@ use Drupony\Drupony;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
- * Includes the composer autoloader if vendors were installed in this dir.
+ * Tries to include the autoloader.
+ * @see _drupony_find_composer_autoloader_dir().
  * No-op if it was already included or our main class exists (external autoloader)
  *
  * @throws RuntimeException If our main class and autoloader don't exist.
@@ -17,12 +18,36 @@ function drupony_autload() {
     return;
   }
 
-  $autoloaderFile = __DIR__ . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
-  if (!file_exists($autoloaderFile)) {
-    throw new RuntimeException(sprintf('Drupony was\'t autoloaded and failed to include %s', $autoloaderFile));
+  $autoloader = variable_get('drupony_autoloader');
+  if (!isset($autoloader) || !file_exists($autoloader)) {
+    $autoloader = _drupony_find_composer_autoloader_dir() . DIRECTORY_SEPARATOR . 'autoload.php';
+    variable_set('drupony_autoloader', $autoloader);
   }
 
-  require_once $autoloaderFile;
+  require_once $autoloader;
+}
+
+/**
+ * Starts looking for a vendor dir inside $min and keeps moving up until it reaches $max,
+ * Unless a vendor dir containing autoload.php is found.
+ *
+ * @param string $min The directory path to start the search in.
+ * @param string $max The highest directory level, once reached searching will stop.
+ * @return string The directory the autoloader resides in.
+ *
+ * @throws RuntimeException If no autoloader was found.
+ */
+function _drupony_find_composer_autoloader_dir($min = __DIR__, $max = DRUPAL_ROOT) {
+  $limit = strlen(realpath($max));
+  while (($min = realpath($min)) && strlen($min) >= $limit) {
+    $dir = $min . DIRECTORY_SEPARATOR . 'vendor';
+    if (is_dir($dir) && file_exists($dir . DIRECTORY_SEPARATOR . 'autoload.php') && is_dir($dir . DIRECTORY_SEPARATOR . 'composer')) {
+      return $dir;
+    }
+    $min .= DIRECTORY_SEPARATOR . '..';
+  }
+
+  throw new \RuntimeException(sprintf('Composer autoloader could not be found'));
 }
 
 function drupony_get_cache_dir($type = 'container') {

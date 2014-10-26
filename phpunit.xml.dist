@@ -8,9 +8,8 @@
     </testsuites>
     <filter>
         <whitelist>
-            <directory suffix=".php">src</directory>
-            <directory suffix=".module">.</directory>
-            <directory suffix=".inc">.</directory>
+            <directory>./src</directory>
+            <file>drupony.module</file>
         </whitelist>
     </filter>
 </phpunit>
