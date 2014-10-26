@@ -39,8 +39,8 @@ class DrupalModuleHookLoader extends FileLoader {
   /**
    * Returns true if this class supports the given resource.
    *
-   * @param mixed  $resource A resource
-   * @param string $type     The resource type
+   * @param mixed $resource A resource
+   * @param string $type The resource type
    *
    * @return bool    true if this class supports the given resource, false otherwise
    */
@@ -52,7 +52,7 @@ class DrupalModuleHookLoader extends FileLoader {
   /**
    * Parses definitions
    *
-   * @param array  $content
+   * @param array $content
    * @param string $file
    */
   private function parseDefinitions($content, $file) {
@@ -73,7 +73,7 @@ class DrupalModuleHookLoader extends FileLoader {
    * Parses a definition.
    *
    * @param string $id
-   * @param array  $service
+   * @param array $service
    * @param string $file
    *
    * @throws InvalidArgumentException When tags are invalid
@@ -213,7 +213,7 @@ class DrupalModuleHookLoader extends FileLoader {
   /**
    * Validates the array contents.
    *
-   * @param mixed  $content
+   * @param mixed $content
    * @param string $file
    *
    * @return array
