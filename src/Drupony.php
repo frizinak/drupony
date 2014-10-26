@@ -6,12 +6,12 @@ namespace Drupony;
 use Drupony\Component\DependencyInjection\Compiler\ResolveVariablePlaceHolderPass;
 use Drupony\Component\DependencyInjection\DruponyContainerBuilder;
 use Drupony\Component\DependencyInjection\Loader\DrupalModuleHookLoader;
-use Drupony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\Config\ConfigCache;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
+use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\Filesystem\Filesystem;
 
 class Drupony {
