@@ -12,7 +12,6 @@ function drupal_get_path($type, $module) {
   return $module;
 }
 
-$conf = array('a_variable' => 'a_value');
 function variable_get($name, $default = NULL) {
   global $conf;
   if (isset($conf[$name])) {
