@@ -53,4 +53,14 @@ class DruponyModuleTest extends \PHPUnit_Framework_TestCase {
     $this->assertFileExists(static::$cacheDir);
   }
 
+  public function testDruponyMainContainer() {
+    $drupony = drupony_get_wrapper(true);
+    $this->assertFileNotExists($drupony->getCacheFilePath());
+    $container = $drupony->getContainer();
+    $this->assertFileExists($drupony->getCacheFilePath());
+    $class = $container->getParameter('symfony.component.filesystem.class');
+    $filesystem = $container->get('symfony.component.filesystem');
+    $this->assertInstanceOf($class, $filesystem);
+  }
+
 }

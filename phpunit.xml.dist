@@ -9,6 +9,8 @@
     <filter>
         <whitelist>
             <directory suffix=".php">src</directory>
+            <directory suffix=".module">.</directory>
+            <directory suffix=".inc">.</directory>
         </whitelist>
     </filter>
 </phpunit>

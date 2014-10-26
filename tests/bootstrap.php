@@ -48,6 +48,10 @@ function module_invoke($module, $hook) {
   }
 }
 
+function conf_path(){
+  return 'sites/default';
+}
+
 $loader = require __DIR__ . '/../vendor/autoload.php';
 register_shutdown_function(function () {
   $fs = new \Symfony\Component\Filesystem\Filesystem();
