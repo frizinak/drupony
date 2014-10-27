@@ -5,6 +5,7 @@ namespace Drupony;
 
 use Drupony\Component\DependencyInjection\Compiler\ResolveVariablePlaceHolderPass;
 use Drupony\Component\DependencyInjection\DruponyContainerBuilder;
+use Drupony\Component\DependencyInjection\Exception\HookNotImplementedByModuleException;
 use Drupony\Component\DependencyInjection\Loader\DrupalModuleHookLoader;
 use Drupony\Component\DependencyInjection\Loader\YamlArrayLoader;
 use Symfony\Component\Config\ConfigCache;
@@ -62,6 +63,24 @@ class Drupony {
     return $this->container;
   }
 
+  public function getModuleHookInfo($module, $hook) {
+    if (!module_hook($module, $hook)) {
+      throw new HookNotImplementedByModuleException($module, $hook);
+    }
+    // File should now be included.
+    // Drupal hook implementation will probably never change in 7
+    // but still worth noting that this is dirty.
+    $functionReflector = new \ReflectionFunction($module . '_' . $hook);
+    return array(
+      'file' => $functionReflector->getFileName(),
+      'invoke' => function () use ($module, $hook) {
+        $args = func_get_args();
+        array_unshift($args, $module, $hook);
+        return call_user_func_array('module_invoke', $args);
+      },
+    );
+  }
+
   public function getCacheFilePath() {
     return $this->cacheDir . DIRECTORY_SEPARATOR . $this->containerClass . '.php';
   }
@@ -95,13 +114,11 @@ class Drupony {
           $yamlLoader->load($yml);
         }
 
-        if (module_hook($module, 'drupony_' . $type)) {
-          // File should now be included.
-          // Drupal hook implementation will probably never change in 7
-          // but still worth noting that this is dirty.
-          $functionReflector = new \ReflectionFunction($module . '_' . $hook);
-          $definition = module_invoke($module, $hook);
-          $moduleLoader->load($functionReflector->getFileName(), NULL, array($type => $definition));
+        try {
+          $hookInfo = $this->getModuleHookInfo($module, $hook);
+          $moduleLoader->load($hookInfo['file'], NULL, array($type => $hookInfo['invoke']()));
+        } catch (HookNotImplementedByModuleException $e) {
+
         }
       }
     }

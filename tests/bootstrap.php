@@ -5,7 +5,7 @@ define('DRUPONY_TEST_DIR', sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'drupony_t
 
 // Spoof some drupal methods.
 function module_list() {
-  return array('drupony');
+  return array('drupony', 'non-existent');
 }
 
 function drupal_get_path($type, $module) {
@@ -34,7 +34,10 @@ function module_hook($module, $hook) {
     return TRUE;
   }
   else {
-    require_once __DIR__ . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . $module . '.module';
+    $file = __DIR__ . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . $module . '.module';
+    if (file_exists($file)) {
+      require_once __DIR__ . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . $module . '.module';
+    }
   }
 
   return function_exists($function);
@@ -48,7 +51,7 @@ function module_invoke($module, $hook) {
   }
 }
 
-function conf_path(){
+function conf_path() {
   return 'sites/default';
 }
 
