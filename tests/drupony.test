@@ -1,0 +1,41 @@
+<?php
+
+class DruponySimpleTest extends DrupalUnitTestCase {
+
+  protected static $cacheDir;
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Drupony test',
+      'description' => '',
+      'group' => 'Drupony',
+    );
+  }
+
+  public function setUp() {
+    static::$cacheDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'drupony_tests' . DIRECTORY_SEPARATOR . 'cacheDir';
+    $GLOBALS['conf']['drupony_cachedir'] = static::$cacheDir;
+    parent::setUp(array('drupony'));
+  }
+
+  public function tearDown() {
+    drupony_flush_caches();
+    parent::tearDown();
+  }
+
+  public function testAutoloader() {
+    $this->assertFalse(class_exists('Drupony\\Drupony'));
+    drupony_autload();
+    $this->assertTrue(class_exists('Drupony\\Drupony'));
+  }
+
+  public function testContainer() {
+    $drupony = drupony_get_wrapper(TRUE);
+    $this->assertFalse(file_exists($drupony->getCacheFilePath()));
+    $this->assertTrue($drupony->getContainer()->has('symfony.component.filesystem'));
+    $this->assertTrue(file_exists($drupony->getCacheFilePath()));
+    drupony_clear_cache('container');
+    $this->assertFalse(file_exists($drupony->getCacheFilePath()));
+  }
+
+}

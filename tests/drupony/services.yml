@@ -2,3 +2,5 @@ services:
   symfony.component.filesystem:
     class:        %symfony.component.filesystem.class%
     arguments:    [@drupony, @container]
+    properties:
+      propertyInjection: @container

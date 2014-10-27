@@ -19,7 +19,7 @@ class DruponyTest extends \PHPUnit_Framework_TestCase {
       if (file_exists($path)) static::$sourceFiles[$k] = $path;
     }
 
-    variable_set('a_variable','a_value');
+    variable_set('a_variable', 'a_value');
   }
 
   public function testDruponyContainerParameter() {
@@ -48,6 +48,7 @@ class DruponyTest extends \PHPUnit_Framework_TestCase {
     $this->assertNotNull($testService->getAVariable());
 
     $this->assertInstanceOf($class, $filesystem);
+    $this->assertInstanceOf('Drupony\\Component\\DependencyInjection\\DruponyContainerBuilder', $filesystem->propertyInjection);
   }
 
   public function testDruponyContainerInstanceCache() {

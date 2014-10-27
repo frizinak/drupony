@@ -8,30 +8,24 @@ use Drupony\Drupony;
 class DruponyModuleTest extends \PHPUnit_Framework_TestCase {
 
   protected static $cacheDir;
-  protected static $setup = false;
 
   public static function setUpBeforeClass() {
-    if (self::$setup) return;
-    self::$setup = true;
     static::$cacheDir = DRUPONY_TEST_DIR . DIRECTORY_SEPARATOR . 'cacheDir';
     variable_set('drupony_cachedir', static::$cacheDir);
     require_once __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'drupony.module';
   }
 
-  public function cacheDirProvider() {
-    self::setUpBeforeClass();
-    return array(
-      array(static::$cacheDir, ''),
-      array(static::$cacheDir . DIRECTORY_SEPARATOR . 'container', 'container'),
-      array(static::$cacheDir . DIRECTORY_SEPARATOR . 'container' . DIRECTORY_SEPARATOR . 'deeper', 'container////deeper'),
-    );
-  }
+  public function testDruponyCacheDir() {
+    foreach (drupony_get_caches() as $cache) {
+      drupony_get_cache_dir($cache);
+    }
 
-  /**
-   * @dataProvider cacheDirProvider
-   */
-  public function testDruponyCacheDir($expected, $arg) {
-    $this->assertEquals($expected, drupony_get_cache_dir($arg));
+    try {
+      drupony_get_cache_dir('doesntexist');
+    } catch (\InvalidArgumentException $e) {
+      return;
+    }
+    $this->fail('An exception should\'ve been thrown');
   }
 
   public function testDruponyCacheClear() {
@@ -70,7 +64,7 @@ class DruponyModuleTest extends \PHPUnit_Framework_TestCase {
   }
 
   public function testDruponyMainContainer() {
-    $drupony = drupony_get_wrapper(true);
+    $drupony = drupony_get_wrapper(TRUE);
     $this->assertFileNotExists($drupony->getCacheFilePath());
     $container = $drupony->getContainer();
     $this->assertFileExists($drupony->getCacheFilePath());

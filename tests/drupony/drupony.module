@@ -4,6 +4,7 @@ class someRandomService {
 
   protected $property;
   protected $aVariable;
+  public $propertyInjection;
 
   /**
    * @return mixed
