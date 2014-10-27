@@ -50,7 +50,25 @@ function _drupony_find_composer_autoloader_dir($min = __DIR__, $max = DRUPAL_ROO
   throw new \RuntimeException(sprintf('Composer autoloader could not be found'));
 }
 
+function drupony_get_caches() {
+  static $caches;
+  if (!isset($caches)) {
+    $caches = array('container');
+    $caches = array_combine($caches, $caches);
+  }
+
+  return $caches;
+}
+
+function drupony_cache_exists($type) {
+  $caches = drupony_get_caches();
+  return isset($caches[$type]);
+}
+
 function drupony_get_cache_dir($type = 'container') {
+  if (!drupony_cache_exists($type)) {
+    throw new InvalidArgumentException(sprintf('The cache %s does not exist', $type));
+  }
   $dir = variable_get('drupony_cachedir', __DIR__ . DIRECTORY_SEPARATOR . 'cache') . '\\' . $type;
   return preg_replace('/(\\\|\\/)+/', DIRECTORY_SEPARATOR, rtrim(trim($dir), '\\/'));
 }
