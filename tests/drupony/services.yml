@@ -1,6 +1,6 @@
 services:
   symfony.component.filesystem:
     class:        %symfony.component.filesystem.class%
-    arguments:    [@drupony, @container]
+    arguments:    [@drupony, @service_container]
     properties:
-      propertyInjection: @container
+      propertyInjection: @service_container

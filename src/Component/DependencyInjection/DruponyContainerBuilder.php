@@ -24,7 +24,6 @@ class DruponyContainerBuilder extends ContainerBuilder {
   public function druponyInitialize() {
     if (!$this->druponyInitialized) {
       $this->variableBag = new DrupalPersistentVariableBag();
-      $this->set('container', $this);
       $this->druponyInitialized = TRUE;
     }
     return $this;
