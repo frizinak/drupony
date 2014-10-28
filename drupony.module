@@ -15,6 +15,16 @@ function drupony_boot() {
 }
 
 /**
+ * Implements hook_hook_info().
+ */
+function drupony_hook_info() {
+  $hooks = array();
+  $hooks['flush_caches'] =
+  $hooks['admin_menu_cache_info'] = array('group' => 'hooks');
+  return $hooks;
+}
+
+/**
  * Tries to include the autoloader.
  * @see _drupony_find_composer_autoloader_dir().
  * No-op if it was already included or our main class exists (external autoloader)
@@ -61,6 +71,11 @@ function _drupony_find_composer_autoloader_dir($min = __DIR__, $max = DRUPAL_ROO
   throw new \RuntimeException(sprintf('Composer autoloader could not be found'));
 }
 
+/**
+ * Get all available drupony caches
+ *
+ * @return array An array who's keys and values contain the available caches.
+ */
 function drupony_get_caches() {
   static $caches;
   if (!isset($caches)) {
@@ -108,23 +123,4 @@ function drupony_get_wrapper($debug = NULL) {
   $debug = isset($debug) ? $debug : variable_get('drupony_debug', FALSE);
   $cacheDir = drupony_get_cache_dir('container') . DIRECTORY_SEPARATOR . sha1(conf_path(FALSE));
   return new Drupony($cacheDir, $debug ? Drupony::CACHE_CHANGE : Drupony::CACHE_FULL, 'Main');
-}
-
-/**
- * Implements hook_flush_caches().
- */
-function drupony_flush_caches() {
-  drupony_clear_cache('container');
-}
-
-/**
- * Implements hook_admin_menu_cache_info
- */
-function drupony_admin_menu_cache_info() {
-  $caches = array();
-  $caches['drupony'] = array(
-    'title' => t('Drupony'),
-    'callback' => 'drupony_flush_caches',
-  );
-  return $caches;
 }

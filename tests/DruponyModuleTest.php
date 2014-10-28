@@ -13,6 +13,8 @@ class DruponyModuleTest extends \PHPUnit_Framework_TestCase {
     static::$cacheDir = DRUPONY_TEST_DIR . DIRECTORY_SEPARATOR . 'cacheDir';
     variable_set('drupony_cachedir', static::$cacheDir);
     require_once __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'drupony.module';
+    require_once __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'drupony.hooks.inc';
+
   }
 
   public function testDruponyCacheDir() {
