@@ -2,6 +2,17 @@
 
 use Drupony\Drupony;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Debug\Debug;
+
+/**
+ * Implements hook_boot().
+ */
+function drupony_boot() {
+  if (variable_get('drupony_debug', FALSE) && variable_get('drupony_error_handler', TRUE)) {
+    drupony_autload();
+    Debug::enable();
+  }
+}
 
 /**
  * Tries to include the autoloader.
@@ -82,19 +93,21 @@ function drupony_clear_cache($type) {
 /**
  * Returns the default Drupony instance.
  *
- * @param bool $dev TRUE:  the container-cache monitors file changes.
- *                  FALSE: the container is cached once and requires a delete before it is refreshed.
- *                  - @see Symfony\Component\Config\ConfigCache
+ * @param bool $debug TRUE:  the container-cache monitors file changes.
+ *                    FALSE: the container is cached once and requires a delete before it is refreshed.
+ *                    NULL:  use variable 'drupony_debug' if set, FALSE otherwise.
+ *                    - @see Symfony\Component\Config\ConfigCache
  * @return Drupony
  */
-function drupony_get_wrapper($dev = FALSE) {
+function drupony_get_wrapper($debug = NULL) {
   static $drupony;
   if (isset($drupony)) {
     return $drupony;
   }
   drupony_autload();
+  $debug = isset($debug) ? $debug : variable_get('drupony_debug', FALSE);
   $cacheDir = drupony_get_cache_dir('container') . DIRECTORY_SEPARATOR . sha1(conf_path(FALSE));
-  return new Drupony($cacheDir, $dev ? Drupony::CACHE_CHANGE : Drupony::CACHE_FULL, 'Main');
+  return new Drupony($cacheDir, $debug ? Drupony::CACHE_CHANGE : Drupony::CACHE_FULL, 'Main');
 }
 
 /**

@@ -6,7 +6,6 @@ namespace Drupony;
 use Drupony\Component\DependencyInjection\Compiler\ResolveVariablePlaceHolderPass;
 use Drupony\Component\DependencyInjection\DruponyContainerBuilder;
 use Drupony\Component\DependencyInjection\Exception\HookNotImplementedByModuleException;
-use Drupony\Component\DependencyInjection\Loader\DrupalModuleHookLoader;
 use Drupony\Component\DependencyInjection\Loader\YamlArrayLoader;
 use Symfony\Component\Config\ConfigCache;
 use Symfony\Component\Config\FileLocator;

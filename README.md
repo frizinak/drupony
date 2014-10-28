@@ -35,6 +35,16 @@ e.a.:
 
 `$ composer update (-o --no-dev)`
 
+# Configuration
+
+- variables (and their default values)
+```
+$conf['drupony_debug'] = FALSE;         // Only enable in dev env (e.a. staging.settings.php)
+$conf['drupony_error_handler'] = TRUE;  // Symfony error handler will only be enabled
+                                        // if both drupony_debug and drupony_error_handler are truthy.
+$conf['drupony_autoloader'] = ?;        // Absolute path to composer autoload.php (optional), will be set if
+                                        // it could be found automatically.
+```
 
 # API
 
