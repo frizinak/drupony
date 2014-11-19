@@ -122,5 +122,6 @@ function drupony_get_wrapper($debug = NULL) {
   drupony_autload();
   $debug = isset($debug) ? $debug : variable_get('drupony_debug', FALSE);
   $cacheDir = drupony_get_cache_dir('container') . DIRECTORY_SEPARATOR . sha1(conf_path(FALSE));
-  return new Drupony($cacheDir, $debug ? Drupony::CACHE_CHANGE : Drupony::CACHE_FULL, 'Main');
+  $drupony = new Drupony($cacheDir, $debug ? Drupony::CACHE_CHANGE : Drupony::CACHE_FULL, 'Main');
+  return $drupony;
 }
