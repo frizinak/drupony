@@ -25,7 +25,7 @@ class DruponySimpleTest extends DrupalUnitTestCase {
 
   public function testAutoloader() {
     $this->assertFalse(class_exists('Drupony\\Drupony'));
-    drupony_autload();
+    drupony_autoload();
     $this->assertTrue(class_exists('Drupony\\Drupony'));
   }
 

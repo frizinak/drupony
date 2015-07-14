@@ -9,7 +9,7 @@ use Symfony\Component\Debug\Debug;
  */
 function drupony_boot() {
   if (variable_get('drupony_debug', FALSE) && variable_get('drupony_error_handler', TRUE)) {
-    drupony_autload();
+    drupony_autoload();
     Debug::enable();
   }
 }
@@ -31,7 +31,7 @@ function drupony_hook_info() {
  *
  * @throws RuntimeException If our main class and autoloader don't exist.
  */
-function drupony_autload() {
+function drupony_autoload() {
   static $loaded;
   if ($loaded) return;
   $loaded = TRUE;
@@ -100,7 +100,7 @@ function drupony_get_cache_dir($type = 'container') {
 }
 
 function drupony_clear_cache($type) {
-  drupony_autload();
+  drupony_autoload();
   $filesystem = new Filesystem();
   $filesystem->remove(drupony_get_cache_dir($type));
 }
@@ -119,7 +119,7 @@ function drupony_get_wrapper($debug = NULL) {
   if (isset($drupony)) {
     return $drupony;
   }
-  drupony_autload();
+  drupony_autoload();
   $debug = isset($debug) ? $debug : variable_get('drupony_debug', FALSE);
   $cacheDir = drupony_get_cache_dir('container') . DIRECTORY_SEPARATOR . sha1(conf_path(FALSE));
   $drupony = new Drupony($cacheDir, $debug ? Drupony::CACHE_CHANGE : Drupony::CACHE_FULL, 'Main');
