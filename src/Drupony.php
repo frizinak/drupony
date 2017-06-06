@@ -107,12 +107,16 @@ class Drupony {
 
       foreach (array('parameters', 'services') as $type) {
         $yml = $path . DIRECTORY_SEPARATOR . $type . '.yml';
-        $hook = 'drupony_' . $type;
 
         if (file_exists(DRUPAL_ROOT . DIRECTORY_SEPARATOR . $yml)) {
           $yamlLoader->load($yml);
         }
+      }
+    }
 
+    foreach (module_list() as $module) {
+      foreach (array('parameters', 'services') as $type) {
+        $hook = 'drupony_' . $type;
         try {
           $hookInfo = $this->getModuleHookInfo($module, $hook);
           $moduleLoader->load($hookInfo['file'], NULL, array($type => $hookInfo['invoke']()));
@@ -121,6 +125,7 @@ class Drupony {
         }
       }
     }
+
 
     $container->has('drupony') || $this->prepareContainer($container);
     $container->addCompilerPass(new ResolveVariablePlaceHolderPass(), PassConfig::TYPE_OPTIMIZE);
